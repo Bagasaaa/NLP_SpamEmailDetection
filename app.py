@@ -3,16 +3,15 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import pandas as pd
 import joblib
+from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'bagas_data_science'
 
-##### home interface as .html
 @app.route("/", methods=['GET'])
 def home():
     return render_template('home.html')
 
-##### PREPROCESSING TEXT (INPUT TEXT) #####
 @app.route("/book_your_hotel_room", methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
@@ -29,7 +28,6 @@ def predict():
                            'RoomType': [room_type_reserved],
                            'checkInDate': [pd.to_datetime(arrival_time)]})
         df['checkInDate'] = df['checkInDate'].astype('int64') // 10**9
-        from sklearn.preprocessing import LabelEncoder
 
         labelEncoder_roomType = LabelEncoder()
 
@@ -42,12 +40,12 @@ def predict():
         labels = {0: "Full Booked", 1: "Booking Success"}
         result = [labels[result]]
             
-        return redirect(url_for("cleansing", text=result))
+        return redirect(url_for("bookingresult", text=result))
 
     return render_template("input_text.html")
 
 @app.route("/<text>", methods=['GET'])
-def cleansing(text):
+def bookingresult(text):
     return f'Booking Status: {text}'
 
 if __name__ == '__main__':
